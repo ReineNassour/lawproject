@@ -55,6 +55,7 @@ include 'header.php';
                         <p class="hero-text">Trusted legal expertise for individuals and businesses. Our attorneys provide strategic counsel and vigorous representation to protect your rights and achieve the best possible outcomes.</p>
                         <div class="hero-buttons">
                             <a href="cases.php" class="btn btn-primary">Book A Case</a>
+                            <a href="chatbot.php" class="btn btn-outline">Ask Our Bot</a>
                             <a href="apply.php" class="btn btn-outline">Apply Now</a>
                         </div>
                     </div>
@@ -171,7 +172,7 @@ include 'header.php';
                         </div>
                     </div>
 
-                    <a href="about.php" class="btn btn-primary mt-4">Learn More</a>
+                    <a href="practice.php" class="btn btn-primary mt-4">Learn More</a>
                 </div>
 
                 <div class="col-lg-6">

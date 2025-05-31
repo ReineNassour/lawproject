@@ -115,7 +115,7 @@ include 'header.php';
                 <?php } ?>
             </div>
         </div>
-    </div>
+    </div> 
     <!-- Service End -->
 
     <!-- Modals Start -->

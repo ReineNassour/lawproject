@@ -1,212 +1,152 @@
 <?php
+session_start();
 include 'db.php';
-?>
 
+if (!isset($_SESSION['cashier'])) {
+    header('location: ../login.php');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>TheFirm - Payment</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Law Firm Case Management" name="keywords">
-    <meta content="Case Management System for Law Firms" name="description">
+    <title>TheFirm – Payment Contract</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords"    content="Law Firm Case Management">
+    <meta name="description" content="Case Management System for Law Firms">
 
-    <!-- Favicon -->
-    <link href="img/favicon.ico" rel="icon">
+    <!-- Favicon & Google Fonts (same across all pages) -->
+    <link rel="icon" href="img/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CSS Libraries -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
-    <link href="lib/animate/animate.min.css" rel="stylesheet">
-    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <!-- CSS / Icon libs -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
-    <!-- Template Stylesheet -->
-    <link href="../css/style.css" rel="stylesheet">
-    <link href="../css/payment.css" rel="stylesheet">
+    <!-- Shared theme sheet -->
+    <link rel="stylesheet" href="../css/admincss.css">
+    <!-- Your original extras -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/payment.css">
 
+    <!-- Page-local tweaks to match dashboard style -->
     <style>
-       @media print {
-    /* Hide all elements with class 'no-print' */
-    .no-print {
-        display: none !important;
-    }
+        /* -------- base -------- */
+        body{font-family:'Poppins',sans-serif;background:#f8f9fa;}
 
-    /* Ensure the title and payment details remain */
-    .payment-header {
-        display: block !important;
-    }
+        /* wrapper & title */
+        .page-wrapper{padding:3rem 0;}
+        .section-title{
+            font-size:2rem;font-weight:600;text-align:center;color:#2c3e50;
+            margin-bottom:2.5rem;position:relative;padding-bottom:15px;
+        }
+        .section-title:after{
+            content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+            width:80px;height:4px;border-radius:2px;background:linear-gradient(to right,#007bff,#00c6ff);
+        }
 
-    /* Remove card shadow and borders for a clean print view */
-    .payment-card {
-        box-shadow: none;
-        border: none;
-    }
+        /* payment “card” */
+        .payment-card{
+            background:#fff;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.08);
+            padding:2rem;margin-bottom:2rem;
+        }
+        .payment-header{
+            font-weight:600;font-size:1.25rem;margin-bottom:1.5rem;color:#007bff;
+        }
+        .payment-table th{width:140px;color:#495057;font-weight:500;}
+        .payment-table th,.payment-table td{padding:.75rem .5rem;font-size:.95rem;}
+        .payment-table input{width:100%;border:1px solid #ced4da;border-radius:8px;padding:.45rem .75rem;}
 
-    /* Ensure payment-container is printed properly */
-    .payment-container {
-        display: block;
-    }
+        /* action buttons */
+        .btn-gradient{
+            background:linear-gradient(45deg,#007bff,#00c6ff);border:none;color:#fff;
+            text-transform:uppercase;font-weight:500;border-radius:8px;padding:.45rem 1.25rem;
+            transition:.3s;font-size:.9rem;
+        }
+        .btn-gradient:hover{background:linear-gradient(45deg,#0056b3,#007bff);}
 
-    /* Hide all buttons during printing except the 'Pending' or 'Accept' buttons */
-    button, a.btn {
-        display: none !important;
-    }
+        /* “Back” button matches other pages */
+        .btn-back{background:#343a40;border:none;color:#fff;border-radius:8px;}
+        .btn-back:hover{background:#23272b;}
 
-    /* Keep only buttons with class 'btn-success' (Pending/Accept) visible */
-    .btn-success {
-        display: inline-block !important;
-    }
-}
+        /* print overrides (your originals kept) */
+        @media print{
+            .no-print,button,a.btn:not(.btn-success){display:none!important;}
+            .payment-card{box-shadow:none;border:none;}
+        }
     </style>
 </head>
+
 <body>
+<?php include 'headerC.php'; ?>
 
 <?php
-include 'headerC.php';
-
-$id = $_GET['id'];
-
-$sql1 = "SELECT * FROM `ccontract` WHERE id='$id'";
-$res1 = $conn->query($sql1);
-$row1 = $res1->fetch_assoc();
-$caseid=$row1['caseid'];
-
-$sql3 = "SELECT * FROM `case` WHERE id='$caseid'";
-$res3 = $conn->query($sql3);
-$row3 = $res3->fetch_assoc();
-$userid=$row3['userid'];
-
-$sql4 = "SELECT * FROM `user` WHERE id='$userid'";
-$res4 = $conn->query($sql4);
-$row4 = $res4->fetch_assoc();
-$email=$row4['email'];
-$fname=$row4['fname'];
-$lname=$row4['lname'];
-?>
-<h1 style="text-align:center;">Payment Contract For : <?=  $fname." ".$lname ; ?></h1>
-<?php
-$sql9="SELECT * FROM `payments` WHERE ccontractid='$id'";
-$res9 = $conn->query($sql9);
-if($res9->num_rows > 0){
-       while($row9=$res9->fetch_assoc()){
-            $status = $row9['status'];
-            $payid = $row9['id'];
-            $payment=$row9['amount'];
-        ?>
-
-
-<div class="container payment-container">
-<?php
-include 'db.php';
-?>
-<form action="paycontractProcess.php" method="post"> 
-        <input type="hidden" name="id" value="<?= $id; ?>">
-        
-        <div id="paymentWrapper">
-            <div class="payment-card">
-                <h2 class="payment-header">Case Payment Details</h2>
-                
-                <table class="payment-table">
-                    <tr>
-                        <th>Payment</th>
-                        <td><input type="text" name="pay[]" placeholder="<?= $payment." $" ; ?>" required></td>
-                    </tr>
-                    <tr>
-                        <th>Date</th>
-                        <td><input type="text" name="date[]" placeholder="<?= $row9['date'] ; ?>" required></td>
-                    </tr>
-                    <tr>
-                        <th>Status</th>
-                        <td>
-                        <?php
-                                    if ($status == "UnPaid") {
-                                    ?>
-                                    <a href="acceptpayment.php?acceptid=1&nbb=<?= $id; ?>" class="btn btn-success">
-                                <i class="fas fa-check mr-2"></i>UnPaid
-                            </a>
-                                        
-                                    <?php
-                                    } else if ($status == "Paid") {
-                                    ?>
-                                    <form action="paymentemail.php" method="post">
-                                        <span class="badge badge-success p-2">
-                                            <input type="hidden" name="payid" value="<?= $payid ; ?>">
-                                            <input type="hidden" name="email" value="<?= $email ; ?>">
-                                            <input type="hidden" name="fname" value="<?= $fname ; ?>">
-                                            <input type="hidden" name="lname" value="<?= $lname ; ?>">
-                                            <input type="hidden" name="payment" value="<?= $payment ; ?>">
-                                            
-                                            <div class="btn btn-success"> <i class="fas fa-check-circle mr-1"></i>Paid</div>
-                                           
-                                        </span>
-                                    </form>
-                                    <?php
-                                    }
-                                    ?>
-                           
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </form>
-
-</div>
-
-
-        <?php
-       }
-}
+$id   = $_GET['id'];
+$row1 = $conn->query("SELECT * FROM `ccontract` WHERE id='$id'")->fetch_assoc();
+$case = $conn->query("SELECT * FROM `case` WHERE id='{$row1['caseid']}'")->fetch_assoc();
+$user = $conn->query("SELECT * FROM `user` WHERE id='{$case['userid']}'")->fetch_assoc();
+$fname=$user['fname']; $lname=$user['lname']; $email=$user['email'];
 ?>
 
-<div class="text-center mb-4">
-    <a href="cashierindex.php" class="btn btn-black btn-action">
-        <i class="fas fa-file-contract mr-1"></i> Back
-    </a>
-</div>
+<div class="container page-wrapper">
+   
+    <h2 class="section-title">Payment Contract&nbsp;for:&nbsp;<?= htmlspecialchars($fname.' '.$lname) ?></h2>
 
+    <?php
+    $payments = $conn->query("SELECT * FROM `payments` WHERE ccontractid='$id'");
+    if($payments->num_rows):
+        $idx = 0;
+        while($p = $payments->fetch_assoc()):
+            $idx++;
+    ?>
+    <!-- one card per payment -->
+    <div class="payment-card">
+        <h3 class="payment-header"><?= $idx ?><?= ($idx==1?'st':($idx==2?'nd':($idx==3?'rd':'th'))) ?> Payment Details</h3>
+        <table class="payment-table w-100">
+            <tr>
+                <th>Payment</th>
+                <td><input type="text" readonly value="<?= htmlspecialchars($p['amount']).' $' ?>"></td>
+            </tr>
+            <tr>
+                <th>Date</th>
+                <td><input type="text" readonly value="<?= htmlspecialchars($p['date']) ?>"></td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>
+                    <?php if($p['status']==='UnPaid'): ?>
+                        <a href="acceptpayment.php?acceptid=1&nbb=<?= $id ?>" class="btn-gradient btn-sm">
+                            <i class="fas fa-check mr-1"></i> UnPaid
+                        </a>
+                    <?php else: ?>
+                        <form action="paymentemail.php" method="post" class="d-inline no-print">
+                            <input type="hidden" name="payid"   value="<?= $p['id']   ?>">
+                            <input type="hidden" name="email"   value="<?= $email     ?>">
+                            <input type="hidden" name="fname"   value="<?= $fname     ?>">
+                            <input type="hidden" name="lname"   value="<?= $lname     ?>">
+                            <input type="hidden" name="payment" value="<?= $p['amount']?>">
+                            <button type="submit" class="btn-gradient btn-sm">
+                                <i class="fas fa-check-circle mr-1"></i> Paid
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <?php endwhile; endif; ?>
 
-<script>
+    <!-- back button -->
+    <div class="text-center">
+        <a href="cashierindex.php" class="btn-back btn-action no-print">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+</div><!-- /.page-wrapper -->
 
-   document.addEventListener("DOMContentLoaded", function () {
-    let counter = 1; // Track number of payments
-    updatePaymentHeaders();
-    
-    document.getElementById("paymentWrapper").addEventListener("click", function (event) {
-        if (event.target.classList.contains("addPayment")) {
-            let wrapper = document.getElementById("paymentWrapper");
-            let newPayment = wrapper.firstElementChild.cloneNode(true);
-            
-            // Clear input values for cloned div
-            newPayment.querySelector("input[name='pay[]']").value = "";
-            newPayment.querySelector("input[name='date[]']").value = "";
-            
-            // Update the header for the new payment card
-            counter++;
-            newPayment.querySelector(".payment-header").textContent = counter + getOrdinal(counter) + " Payment Details";
-            
-            wrapper.appendChild(newPayment);
-            updatePaymentHeaders();
-        }
-        
-       
-    });
-
-    function updatePaymentHeaders() {
-        let paymentCards = document.querySelectorAll(".payment-card");
-        paymentCards.forEach((card, index) => {
-            card.querySelector(".payment-header").textContent = (index + 1) + getOrdinal(index + 1) + " Payment Details";
-        });
-    }
-    
-    function getOrdinal(n) {
-        let suffixes = ["th", "st", "nd", "rd"];
-        let v = n % 100;
-        return suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0];
-    }
-});
-
-</script>
-
+<!-- JS libs -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

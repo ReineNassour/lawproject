@@ -96,7 +96,6 @@ if (!isset($_SESSION['user'])) {
                                 <span id="current-word-count">0</span> / 150 words
                             </div>
                         </div>
-
                         <div class="text-center">
                             <button type="submit" onclick="getatt()" class="btn btn-primary">Find Attorneys</button>
                         </div>

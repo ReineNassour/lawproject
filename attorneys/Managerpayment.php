@@ -1,5 +1,10 @@
 <?php
-ob_start(); // Start output buffering
+ob_start();
+session_start();
+if (!isset($_SESSION['manager'])) {
+    header('location: ../login.php');
+    exit();
+}
 
 include 'db.php';
 ?>
@@ -23,74 +28,67 @@ include 'db.php';
     <link href="lib/animate/animate.min.css" rel="stylesheet">
 
     <!-- Template Stylesheet -->
-    <link href="../css/style.css" rel="stylesheet">
-    <link href="../css/managerpayment.css" rel="stylesheet">
-
+    <link href="../css/admincss.css" rel="stylesheet">
+   
 </head>
+
 <body>
+<?php include 'headerM.php'; ?>
 
-<?php
-include 'headerM.php';
-?>
-    <div class="wrapper">
-        <?php
-       
+<div class="wrapper">
+    <?php
+    $id = $_GET['pid'];
+    $sql = "SELECT * FROM ccontract where caseid='$id'";
+    $result = $conn->query($sql);
+    $row = $result->fetch_assoc();
+    $caseid = $row['caseid'];
+    $status = $row['status'];
 
-        $id = $_GET['pid'];
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $desc = mysqli_real_escape_string($conn, $_POST['desc']);
+        $tot = $_POST['total'];
+        $nbrofpay = $_POST['nbrofpay'];
 
-        $sql = "SELECT * FROM ccontract where caseid='$id'";
-        $result = $conn->query($sql);
-        $row = $result->fetch_assoc();
-        $caseid = $row['caseid'];
-        $status = $row['status'];
+        $sql1 = "UPDATE ccontract SET description='" . $desc . "',total='" . $tot . "' ,nbrofpay='" . $nbrofpay . "'  ,status='Accepted' where caseid=$id";
+        $conn->query($sql1);
 
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $desc = mysqli_real_escape_string($conn, $_POST['desc']);
-            $tot = $_POST['total'];
-            $nbrofpay = $_POST['nbrofpay'];
+        header("Location: indexManager.php");
+    }
 
-            $sql1 = "UPDATE ccontract SET description='" . $desc . "',total='" . $tot . "' ,nbrofpay='" . $nbrofpay . "'  ,status='Accepted' where caseid=$id";
-            $conn->query($sql1);
+    $sql4 = "SELECT * FROM `case` WHERE id = '$caseid'";
+    $res4 = $conn->query($sql4);
+    $row4 = $res4->fetch_assoc();
+    $userid = $row4['userid'];
+    $attid = $row4['attid'];
+    $description = $row4['description'];
 
-            header("Location: indexManager.php");
-        }
+    $sql5 = "SELECT * FROM `user` WHERE id = '$userid'";
+    $res5 = $conn->query($sql5);
+    $row5 = $res5->fetch_assoc();
+    $fname = $row5['fname'];
+    $lname = $row5['lname'];
 
-        
-         $sql4 = "SELECT * FROM `case` WHERE id = '$caseid'";
-        $res4 = $conn->query($sql4);
-        $row4 = $res4->fetch_assoc();
-        $userid = $row4['userid'];
-        $attid= $row4['attid'];
-        $description = $row4['description'];
+    $sql6 = "SELECT * FROM `user` WHERE id = '$attid'";
+    $res6 = $conn->query($sql6);
+    $row6 = $res6->fetch_assoc();
+    $attfname = $row6['fname'];
+    $attlname = $row6['lname'];
+    ?>
 
-        $sql5 = "SELECT * FROM `user` WHERE id = '$userid'";
-        $res5 = $conn->query($sql5);
-        $row5 = $res5->fetch_assoc();
-        $fname = $row5['fname'];
-        $lname = $row5['lname'];
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-header bg-light">
+                <h4 class="mb-1">Payment Information</h4><br>
+                <p class="mb-0"><strong>From:</strong> <?= $attfname . " " . $attlname ?> | <strong>For:</strong> <?= $fname . " " . $lname ?></p>
+              <br>  <p class="text-muted mb-0"><strong>Case Description:</strong> <?= $description ?></p>
+            </div>
 
-        $sql6 = "SELECT * FROM `user` WHERE id = '$attid'";
-        $res6 = $conn->query($sql6);
-        $row6 = $res6->fetch_assoc();
-        $attfname = $row6['fname'];
-        $attlname = $row6['lname'];
-        ?>
-
-        <!-- Main Content Start -->
-        <div class="container dashboard-container">
-           
-
-
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">Payment Information From: <b><?= $attfname." ".$attlname." For: ".$fname." ".$lname ; ?></b></h4><br>
-                    <p class="mb-0">Description : <?= $description ; ?></p>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        <table class="table table-custom">
+            <div class="card-body">
+                <form method="post">
+                    <table class="table table-borderless">
+                        <tbody>
                             <tr>
-                                <th>Description</th>
+                                <th style="width: 200px;">Description</th>
                                 <td>
                                     <input type="text" class="form-control" name="desc" value="<?= $row['description'] ?>" required>
                                 </td>
@@ -111,85 +109,67 @@ include 'headerM.php';
                                 <td>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
-                                            <span class="input-group-text">$</span>
+                                            <span class="input-group-text">#</span>
                                         </div>
                                         <input type="text" class="form-control" name="nbrofpay" value="<?= $row['nbrofpay'] ?>" required>
                                     </div>
                                 </td>
                             </tr>
-                           
+                            <tr>
                                 <th>Status</th>
                                 <td>
-                                    <?php
-                                    if ($status == "Pending") {
-                                    ?>
+                                    <?php if ($status == "Pending") { ?>
                                         <a href="managerpayaccept.php?acceptid=1&nbb=<?= $id; ?>" class="btn btn-success">
-                                            <i class="fas fa-check mr-2"></i>Accept
+                                            <i class="fas fa-check mr-1"></i>Accept
                                         </a>
-                                        </td>
-                            </tr>
-                        </table>
-
-                        <div class="action-buttons">
-                            <button type="submit" class="btn btn-custom-primary">
-                                <i class="fas fa-save mr-2"></i>Update Payment Details
-                            </button>
-                            <a href="indexManager.php" class="btn btn-secondary ml-2">
-                                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-                                    <?php
-                                    } else if ($status == "Accepted") {
-                                    ?>
+                                    <?php } else if ($status == "Accepted") { ?>
                                         <span class="badge badge-success p-2">
                                             <i class="fas fa-check-circle mr-1"></i> Already Accepted
                                         </span>
-                                    
+                                    <?php } ?>
                                 </td>
                             </tr>
-                        </table>
+                        </tbody>
+                    </table>
 
-                        <div class="action-buttons">
-                            
-                            <a href="indexManager.php" class="btn btn-secondary ml-2">
-                                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
-                            </a>
-                        </div>
-                    </form>
-                </div>
+                    <div class="mt-4">
+                        <?php if ($status == "Pending") { ?>
+                            <button type="submit" class="btn btn-primary mr-2">
+                                <i class="fas fa-save mr-1"></i>Update Payment Details
+                            </button>
+                        <?php } ?>
+                        <a href="indexManager.php" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
-        <?php
-                                    }
-                                    ?>
-        <!-- Main Content End -->
-
-        <!-- Footer Start -->
-        <div class="footer bg-dark text-white py-4 mt-5">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
-                        <p class="m-0">&copy; 2025 TheFirm. All Rights Reserved.</p>
-                    </div>
-                    <div class="col-md-6 text-center text-md-right">
-                        <p class="m-0">Designed by <a href="#" class="text-white">LegalTech Solutions</a></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Footer End -->
     </div>
 
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <!-- Footer Start -->
+    <div class="footer bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
+                    <p class="m-0">&copy; 2025 TheFirm. All Rights Reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-right">
+                    <p class="m-0">Designed by <a href="#" class="text-white">LegalTech Solutions</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+</div>
+
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
+
 <?php
-ob_end_flush(); // End the output buffer and send the output
+ob_end_flush();
 ?>

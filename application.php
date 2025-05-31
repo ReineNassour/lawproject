@@ -1,5 +1,9 @@
 <?php
 session_start();
+if (!isset($_SESSION['user']['id'])) {
+    header('location: login.php');
+    exit();
+}
 include 'checkStatus.php';
 include 'header.php';
 ?>
@@ -89,52 +93,58 @@ include 'header.php';
            
 
             <!-- Cases Table -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <div style="text-align: center;">
-                        <?php
-$sql9="SELECT * FROM `quiz` where status='Pending' ORDER BY id LIMIT 1";
-$res9=$conn->query($sql9);
-if($res9->num_rows > 0){
-$row9=$res9->fetch_assoc();
-$quizid=$row9['id'];
-    $quizdate=$row9['date'];
-    $starttime=$row9['starttime'];
-    $endtime=$row9['endtime'];
+         <div class="card shadow-sm mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <div style="text-align: center;">
+                <?php
+                $sql9 = "SELECT * FROM `quiz` ORDER BY id DESC LIMIT 1 ";
+                $res9 = $conn->query($sql9);
 
- $sql4 = "SELECT * FROM `answers` WHERE userid = '$idd'";
-$res4 = $conn->query($sql4);
-if ($res4->num_rows == 0) {
-    $row4 = $res4->fetch_assoc();
-    ?>
-              <div style="text-align: center;">
-              <div class="alert alert-info" role="alert">
-    <strong>Exam Scheduled On:</strong> <?= $quizdate ?> 
-    <strong>At:</strong> <?= date('H:i', strtotime($starttime)) ?> pm
-    <strong>Till:</strong> <?= date('H:i', strtotime($endtime)) ?> pm
+                if ($res9 && $res9->num_rows > 0) {
+                    $row9 = $res9->fetch_assoc();
+                    $quizid = $row9['id'];
+                    $quizdate = $row9['date'];
+                    $starttime = $row9['starttime'];
+                    $endtime = $row9['endtime'];
+                    $status = $row9['status'];
+
+                    if ($status == 'Finished') {
+                        // Check if user has submitted any answers
+                        $sql4 = "SELECT * FROM `answers` WHERE userid = '$idd'";
+                        $res4 = $conn->query($sql4);
+
+                        if ($res4 && $res4->num_rows == 0) {
+                            ?>
+                            <div class="alert alert-danger" role="alert">
+                                <strong>Exam is Finished. You Have Not Attempted The Exam.</strong>
+                            <?php
+                        } else {
+                            ?>
+                            <div class="alert alert-info" role="alert">
+                                <strong>You Will Be Notified Via 'Email' Once Your Result Is Available.</strong>
+                            </div>
+                            <?php
+                        }
+                    } else {
+                        ?>
+                      
+                         <div class="alert alert-info" role="alert">
+                            <strong>Exam Scheduled on:</strong> <?= date('F d, Y', strtotime($quizdate)) ?>
+                           <strong> From: </strong> <?= date('h:i A', strtotime($starttime)) ?>
+                          <strong>  Till: </strong><?= date('h:i A', strtotime($endtime)) ?>
+                        </div>
+                        <?php
+                    }
+                }
+                ?>
+            </div>
+        </div>
+    </div>
 </div>
 
-                <?php
-} else {
-?>
-<div style="text-align: center;">
-                <div class="alert alert-info" role="alert">
-                <strong>You Will Be Notified Via 'Email' Once Your Result Is Available.</strong>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-                </div>
-<?php
-}
-} else {
-    ?>
-    <div style="text-align: center;">
-                <div class="alert alert-danger" role="alert">
-                    <strong>Your Exam will be Scheduled Soon by The Firm.</strong>
-                </div>
-                <?php
-}
-?>
-                        </div><br>
+
+<br>
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr style="text-align:center;">

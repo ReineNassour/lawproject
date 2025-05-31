@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     preg_match('/(https?:\/\/[^\s]+)/', $message, $match);
     $link = isset($match[1]) ? $match[1] : '';
 
-    preg_match('/date:\s*(\d{4}-\d{2}-\d{2})\s*time:\s*(\d{2}:\d{2})/', $message, $matches);
+    preg_match('/date:\s*(\d{2}-\d{2}-\d{4})\s*time:\s*(\d{2}:\d{2})/', $message, $matches);
 
     $date = isset($matches[1]) ? $matches[1] : '';
     $time = isset($matches[2]) ? $matches[2] : '';

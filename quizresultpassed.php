@@ -115,7 +115,7 @@ $specialized=$row2['specialized'];
     <p>You've officially passed the exam and earned your place as a partner at <strong>The Firm</strong>.</p>
     <h5>We are proud to have you on the team.</h5>
     <a href="newattContract.php?id=<?= $userId ; ?>" class="back-link">
-        <button class="back-button">New Contract</button>
+        <button class="back-button">View Contract</button>
     </a>
 </div>
 

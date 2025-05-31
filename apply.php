@@ -1,6 +1,10 @@
 <?php
 ob_start();
 session_start(); 
+if (!isset($_SESSION['user']['id'])) {
+    header('location: login.php');
+    exit();
+}
 include 'checkStatus.php';
 include 'header.php';
 

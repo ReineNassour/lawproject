@@ -3,6 +3,10 @@ session_start();
 include 'checkStatus.php';
 include 'db.php';
 
+if (!isset($_SESSION['user'])) {
+    header('location:login.php');
+    exit();
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['languageName']) && isset($_POST['languageLevel'])) {

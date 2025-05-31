@@ -2,6 +2,11 @@
 session_start();
 include 'checkStatus.php';
 include 'header.php';
+
+if (!isset($_SESSION['user']['id'])) {
+    header('location: login.php');
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,6 +35,67 @@ include 'header.php';
     <link href="css/cases.css" rel="stylesheet">
 </head>
 <style>
+.quiz-table input[readonly] {
+    border: none;
+    background-color: transparent;
+    font-weight: 600;
+    color: #222;
+    box-shadow: none;
+    cursor: default;
+}
+
+.btn-black {
+    background-color: #111 !important;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-black:hover {
+    background-color: #000 !important;
+}
+
+.btn-black i {
+    transition: transform 0.3s ease;
+}
+
+.btn-black:hover i {
+    transform: scale(1.2);
+}
+
+.quiz-card {
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.quiz-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 576px) {
+    .quiz-container {
+        padding: 15px;
+    }
+
+    .quiz-table th, .quiz-table td {
+        display: block;
+        width: 100%;
+        text-align: left !important;
+        padding: 5px 0;
+    }
+
+    .quiz-table input[type="text"] {
+        width: 100%;
+    }
+}
+
+
+
+
+
       .page-header {
     height: 150px;
     display: flex;
@@ -241,11 +307,7 @@ if ($currentDateTime >= $quizStartDateTime && $currentDateTime <= $quizEndDateTi
                            </tr>
                        </table>
                
-                       <!-- 👇 Chatbot Section (inside the loop for each question) -->
-                       <div class="question-block">
-                           <button type="button" class="ask-button" onclick="askChatbot(<?= $questid ?>)">Ask Chatbot</button>
-                           <div class="chatbot-box" id="chatbox-<?= $questid ?>"></div>
-                       </div>
+                     
                    </div>
                <?php
                    $counter++;

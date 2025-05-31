@@ -2,6 +2,11 @@
 session_start();
 include 'checkStatus.php';
 include 'header.php';
+
+if (!isset($_SESSION['user'])) {
+    header('location:login.php');
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,6 +49,18 @@ include 'header.php';
     color: #000; /* Dark text color */
 }
 
+.dashboard-container {
+    width: 100%;
+}
+
+.table-responsive {
+    width: 100%;
+}
+
+.table {
+    width: 100% !important;
+    table-layout: auto;
+}
     </style>
 
 </head>
@@ -73,16 +90,9 @@ include 'header.php';
 
     <div class="wrapper">
         <!-- Main Content Start -->
-        <div class="container dashboard-container">
-            
-
-            <!-- Status Card -->
-            
+       <div class="container-fluid dashboard-container">
                              <?php
                            $idd=  $_SESSION['user']['id'];
-
-                       
-
                         ?>
            
 
@@ -90,20 +100,21 @@ include 'header.php';
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                     
 
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                     <th>Case</th>
+                                     <th>#</th>
                                     <th>Attorney</th>
                                     <th>Messages</th>
                                     <th>Messages </th>
-                                    <th>Sessions</th>
+                                    <th>Sessions/Meetings</th>
                                     <th>Case Contract</th>
                                     <th>Payment Contract</th>
+                                    <th>Payment Bill</th>
                                     <th>Rate Your Attorney</th>
                                     <th>Case History</th>
+                                    <th>Documents</th>
                                     <th>Case Result</th>
                                 </tr>
                             </thead>
@@ -140,7 +151,7 @@ include 'header.php';
     <td>
 
 <!-- Receive Button (Unique Modal ID) -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal<?= $caseid ?>">Receive</button>
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal<?= $caseid ?>">Show</button>
 
 <!-- Contact Form Modal (Unique Modal ID) -->
 <div class="modal fade" id="contactModal<?= $caseid ?>" tabindex="-1" aria-labelledby="contactModalLabel<?= $caseid ?>" aria-hidden="true">
@@ -167,8 +178,6 @@ if ($result5 && $result5->num_rows > 0) {
 else {
     echo "<div class='alert alert-info'>No messages received yet.</div>";
 }
-
-  
 
 
 ?>
@@ -313,12 +322,12 @@ $res7 = $conn->query($sql7);
 if ($res7->num_rows > 0) { 
     $row7 = $res7->fetch_assoc();
     
-    $sql8 = "SELECT * FROM `address` ORDER BY id DESC LIMIT 1";
+    $sql8 = "SELECT * FROM `address` where caseid='$caseid' ORDER BY id DESC LIMIT 1";
     $result8 = $conn->query($sql8);
     $row8 = $result8->fetch_assoc();
-    $addressText = "<br><b>Location:</b> " . htmlspecialchars($row8['details']) . ", " .
-        htmlspecialchars($row8['city']) . ", " .
-        htmlspecialchars($row8['building']) . ", " .
+    $addressText = "<br><b>Location:</b> " . htmlspecialchars($row8['details']) . ",<b> City:</b> " .
+        htmlspecialchars($row8['city']) . ", <b>Building:</b> " .
+        htmlspecialchars($row8['building']) . ",<b> Street:</b> " .
         htmlspecialchars($row8['street']);
 
         $sql9 = "SELECT * FROM `judge` where caseid='$caseid' ORDER BY id DESC LIMIT 1";
@@ -364,10 +373,17 @@ if ($res7->num_rows > 0) {
     </td>
 
     <td>
+        <a href="paymentbill.php?id=<?= $caseid ; ?>"><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal">Bill</button></a>
+    </td>
+
+    <td>
     <a href="attorneys.php?id=<?= $caseid ; ?>"><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal">Rate</button></a>
     </td>
 
     <td> <a href="history.php?id=<?= $caseid ; ?>"><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal">History</button></a></td>
+
+<td> <a href="documents.php?id=<?= $caseid ; ?>"><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal">Docs</button></a></td>
+
 
     <td>
     <?php

@@ -3,7 +3,10 @@ session_start();
 include 'checkStatus.php';
 include 'db.php';
 
-
+if (!isset($_SESSION['user']['id'])) {
+    header('location: login.php');
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -27,6 +30,9 @@ include 'db.php';
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
+
 
     <!-- Animation -->
     <link href="lib/animate/animate.min.css" rel="stylesheet">
@@ -60,6 +66,25 @@ include 'db.php';
   margin-top: 20px;
 }
 
+    /* This will make sure it's visible */
+.no-print {
+    display: block !important;
+}
+
+
+     .steps-box {
+        background-color: #fff8e1;
+        border-left: 6px solid #ffc107;
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-top: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #5d4037;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        
+    }
+
+    
 </style>
 
 </head>
@@ -81,8 +106,6 @@ include 'db.php';
 
 
 <?php
-
-
 
 $caseid=$_GET['id'];
 
@@ -108,6 +131,7 @@ $sql3 = "SELECT * FROM `ccontract` where caseid='$caseid'";
     } else{
     $row3 = $res3->fetch_assoc();
 $status=$row3['status'];
+$contractid=$row3['id'];
 if ($status == 'Accepted') {
 
     $sql = "SELECT * FROM `case` where id='$caseid'";
@@ -115,6 +139,7 @@ if ($status == 'Accepted') {
     $row = $result->fetch_assoc();
     $userid = $row['userid'];
     $attid=$row['attid'];
+    $img=$row['caseContractimg'];
 
     $sql2 = "SELECT * FROM user where id='$attid'";
     $res2 = $conn->query($sql2);
@@ -128,6 +153,10 @@ if ($status == 'Accepted') {
     $fname = $row1['fname'];
     $lname = $row1['lname'];
     $email = $row1['email'];
+
+    $sql5 = "SELECT * FROM `payments` where ccontractid='$contractid'";
+    $res5 = $conn->query($sql5);
+    if ($res5->num_rows > 0) {
 ?>
 
    
@@ -135,12 +164,26 @@ if ($status == 'Accepted') {
         <div class="wrapper">
             <!-- Main Content Start -->
             <div class="container dashboard-container">
-                <div class="contract-header">
-                    <h2>
-                        <i class="fas fa-file-contract mr-2"></i>
-                        Case Contract For: <?php echo htmlspecialchars($fname . " " . $lname); ?>
-                    </h2>
-                </div>
+              
+
+                <?php
+if($img == 0) {
+                ?>
+<div id="capture-only">
+    <!-- This is where your contract content goes -->
+    <div class="contract-card">
+        <form method="post" dir="rtl">
+<div id="capture-area">
+    <div id="contract-only">
+
+<div class="steps-box" style="text-align: center;">
+   <h1>Steps to Complete the Case Contract:</h1>
+       1- Sign the contract.<br>
+       2- Capture a photo of the signed contract.<br>
+       3- Send the Case contract to your attorney.<br>
+   
+</div>
+
 
                 <div class="contract-card">
                     <form method="post" dir="rtl">
@@ -191,8 +234,38 @@ if ($status == 'Accepted') {
                         <br>
                         الشروط: لا يوجد شروط إضافية أو قيود على نطاق التفويض، ويمكن للمحامي اتخاذ جميع الإجراءات القانونية اللازمة بناءً على تقديره.
                         <br><br>
-                        <label>:التوقيع</label>
+                        <!-- 1️⃣  Signature Area  -->
+<div class="form-group mt-3">
+    <label>:التوقيع</label><br>
 
+    <!-- Canvas where the user draws -->
+    <canvas id="signature-pad"
+            width="600" height="150"
+            style="border:1px solid #ccc; width:40%; height:150px;"></canvas>
+
+    <!-- Buttons -->
+    <!-- Buttons (excluded from screenshot) -->
+<div class="mt-3">
+    <input type="hidden" name="signature_image" id="signature-image">
+
+    <button type="button" class="btn btn-danger no-capture" id="btnClear">Clear Signature</button>
+    <button type="button" class="btn btn-primary no-capture" id="btnExportPng">Capture as a Photo</button>
+
+
+</div>
+
+  </form>
+    </div>
+</div>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <!-- (optional) hidden field if you also want to POST the signature -->
+    <input type="hidden" name="signature_image" id="signature-image">
+</div> </div> 
+
+<!-- 2️⃣  html2canvas (for PNG download) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
                        
                         <br><br>
                         <div class="form-group">
@@ -207,11 +280,63 @@ if ($status == 'Accepted') {
                         
                     </form>
                 </div>
+</div>
+<br><br>
+ <div class="card shadow-sm mt-5 no-print">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">
+                <i class="fas fa-upload mr-2 text-primary"></i>Upload &amp; Send Contract
+            </h5>
+        </div>
+        <div class="card-body">
+            <form action="updatecontract.php" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="mb-2"><i class="fas fa-file-upload mr-1"></i>اختر ملف العقد:</label>
+                    <input type="file" name="uploadfile" class="form-control" required>
+                </div>
+                <input type="hidden" name="caseid" value="<?= $caseid ; ?>">
+                <button type="submit" name="enter" class="btn btn-primary mt-3">
+                    <i class="fas fa-paper-plane mr-1"></i> Send Documents
+                </button>
+            </form>
+        </div>
+    </div>
 
   <?php
-    } else {
-       ?>
+   }
+  else {
+?>
 
+
+ <div style="text-align: center;">
+            <img src="./<?= $img ; ?>" width="80%" height="80%" alt="Contract Image" />
+        </div>
+<br><br>
+        <div style="text-align: center;">
+            <a href="track.php" class="btn btn-primary">Back</a>
+        </div>
+
+<?php
+ 
+}
+} else {
+    ?>
+                    <div class="row">
+    <div class="col-12">
+        <div class="application-message">
+            <i class="fas fa-hourglass-half"></i>
+            <h1>Your Case Contract Will Be Ready for Signing Soon</h1>
+            <p class="mb-4">You will soon be able to sign your Case Contract along with your Payment Contract. Please note that your attorney is preparing Your Payment Contract. Kindly wait while we finalize the documents.</p>
+            <a href="track.php" class="btn btn-primary">Back</a>
+        </div>
+    </div>
+</div>
+
+    <?php
+}
+ }  
+  else {
+        ?>
                      <div class="row">
                         <div class="col-12">
                             <div class="application-message">
@@ -224,12 +349,12 @@ if ($status == 'Accepted') {
                     </div>
 
        <?php
-    }
+  }
 }
     ?>
     
             <!-- Main Content End -->
-<br><br><br><br><br><br><br>
+<br><br><br>
            <?php
             include 'footer.php';
            ?>
@@ -250,9 +375,90 @@ if ($status == 'Accepted') {
                 $('[data-toggle="tooltip"]').tooltip();
             });
         </script>
+
+
+<script>
+    // Signature drawing setup
+    const canvas = document.getElementById('signature-pad');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+
+    let drawing = false;
+
+    canvas.addEventListener('mousedown', e => {
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener('mousemove', e => {
+        if (!drawing) return;
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+    });
+
+    ['mouseup', 'mouseleave'].forEach(evt => {
+        canvas.addEventListener(evt, () => {
+            drawing = false;
+            ctx.closePath();
+        });
+    });
+
+    // ✅ Clear Signature Button
+    document.getElementById('btnClear').addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    // Export PNG (html2canvas)
+    document.getElementById('btnExportPng').addEventListener('click', () => {
+        const elementsToHide = [
+            document.querySelector('header'),
+            document.querySelector('footer'),
+            document.querySelector('.no-print'),
+            document.getElementById('btnClear'),
+            document.getElementById('btnExportPng'),
+            document.getElementById('translateButton'),
+            document.getElementById('language-toggle')
+        ];
+
+        elementsToHide.forEach(el => {
+            if (el) el.style.display = 'none';
+        });
+
+        const stepsBox = document.querySelector('.steps-box');
+        if (stepsBox) stepsBox.style.display = 'block';
+
+        const captureArea = document.getElementById('capture-only');
+
+        html2canvas(captureArea, {
+            scale: 2,
+            useCORS: true
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = 'case-contract.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Restore hidden elements
+            elementsToHide.forEach(el => {
+                if (el) el.style.display = '';
+            });
+        });
+    });
+
+    // Save signature to hidden input when form is submitted
+    document.querySelector('form')?.addEventListener('submit', () => {
+        document.getElementById('signature-image').value = canvas.toDataURL('image/png');
+    });
+</script>
+
+
     </body>
-
     </html>
-</body>
-
-</html>

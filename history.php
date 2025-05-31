@@ -1,5 +1,11 @@
 <?php
+session_start();
 include 'db.php';
+
+if (!isset($_SESSION['user']['id'])) {
+    header('location: login.php');
+    exit();
+}
 ?>
 
 <!DOCTYPE html>

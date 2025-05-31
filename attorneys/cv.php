@@ -1,7 +1,11 @@
-<?php 
-include 'db.php';
+<?php
+session_start();
+include '../db.php';
 
-
+if (!isset($_SESSION['manager'])) {
+    header("Location: ../login.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -9,13 +13,16 @@ include 'db.php';
 
 <head>
     <meta charset="utf-8">
-    <title>TheFirm - Case Management</title>
+    <title>TheFirm - Attorney CV</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Law Firm Case Management" name="keywords">
-    <meta content="Case Management System for Law Firms" name="description">
+    <meta content="Law Firm, Attorney CV, Legal Professional Profile" name="keywords">
+    <meta content="View detailed attorney CV and professional profile" name="description">
 
     <!-- Favicon -->
     <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- CSS Libraries -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
@@ -23,308 +30,383 @@ include 'db.php';
     <link href="lib/animate/animate.min.css" rel="stylesheet">
     <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
 
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <!-- Template Stylesheet -->
-    <link href="../css/style.css" rel="stylesheet">
-    <link href="../css/attindex.css" rel="stylesheet">
+    <link href="../css/admincss.css" rel="stylesheet">
 
-     <!-- Favicon -->
-     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+    <style>
+        /* CV Page Specific Styling */
+        .cv-profile-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 40px 0;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        .cv-profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 0 auto 20px;
+        }
 
-<!-- Font Awesome -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        .cv-profile-name {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
 
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+        .section-title {
+            position: relative;
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            padding-bottom: 10px;
+        }
 
-<!-- Animation -->
-<link href="lib/animate/animate.min.css" rel="stylesheet">
+        .section-title:after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 3px;
+            background: #3498db;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
 
-<!-- Carousel -->
-<link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+        .cv-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 40px;
+        }
 
-<!-- Custom Styles -->
-<link href="css/apply.css" rel="stylesheet">
+        .content-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
 
-<style>
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
 
-   /* Ensure consistent box-sizing */
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-}
+        .content-card h4 {
+            color: #3498db;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
 
-/* Reduce padding and margin for the sections */
-.form-section {
-    padding: 20px 0;  /* Reduced vertical padding */
-    margin-bottom: 20px; /* Reduced margin between sections */
-}
+        .content-card h4 i {
+            margin-right: 10px;
+            font-size: 22px;
+        }
 
-/* Reducing margin for the .mb-4 class to reduce space between content blocks */
-.mb-4 {
-    margin-bottom: 10px; /* Reduced margin bottom */
-}
+        .content-detail {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
 
-/* Adjust padding for the .p-4 class to reduce padding inside content cards */
-.p-4 {
-    padding: 15px; /* Reduced padding inside content cards */
-}
+        .cv-footer {
+            text-align: center;
+            margin: 30px 0;
+        }
 
-/* Reduce margin for the card elements */
-.card {
-    margin-bottom: 15px; /* Reduced space between cards */
-}
+        .back-btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 30px;
+            border-radius: 30px;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+        }
 
-/* Form container styles */
-.form-container {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
-}
+        .back-btn:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
 
-/* Background color for .bg-light */
-.bg-light {
-    background-color: #f8f9fa !important;
-}
+        .empty-state {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-/* Text primary color for section titles */
-h4.text-primary {
-    font-weight: 600;
-}
+        .empty-state i {
+            font-size: 30px;
+            color: #bdc3c7;
+            margin-bottom: 10px;
+        }
 
-/* Make each card in the sections identical */
-.card-body,
-.mb-4.p-4.bg-light.rounded.border.shadow-sm {
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 10px;  /* Reduced margin */
-    border: 1px solid #ddd;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
-}
+        .badge-custom {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            font-weight: 500;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
 
-/* Specific styles for divs inside both sections */
-.p-3.bg-white.rounded.border {
-    padding: 15px;
-    background-color: #fff;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-}
+        @media (max-width: 767px) {
+            .cv-profile-header {
+                padding: 30px 0;
+            }
 
-/* Alert box for no cases found */
-.alert-info {
-    background-color: #d9edf7;
-    color: #31708f;
-    font-size: 16px;
-}
+            .cv-profile-image {
+                width: 120px;
+                height: 120px;
+            }
 
-/* Specific padding and background color for .p-3.bg-white */
-.p-3.bg-white {
-    background-color: #fff !important;
-    font-size: 15px;
-    border-radius: 8px;
-}
+            .cv-profile-name {
+                font-size: 24px;
+            }
 
-</style>
-    
+            .section-title {
+                font-size: 20px;
+            }
+
+            .cv-section {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    
-<?php
-include 'header.php';
-$userid=$_GET['id'];
-$sql1 = "SELECT * FROM `cv` WHERE userid='$userid'";
-$res1 = $conn->query($sql1);
+    <?php
+    include 'headerM.php';
+    $userid = $_GET['id'];
+    $sql1 = "SELECT * FROM `cv` WHERE userid='$userid'";
+    $res1 = $conn->query($sql1);
     $row1 = $res1->fetch_assoc();
     $cvid = $row1['id'];
     $univ = $row1['university'];
     $year = $row1['year'];
-    $level= $row1['level'];
+    $level = $row1['level'];
     $desc = $row1['description'];
 
     $sql = "SELECT * FROM `user` WHERE id='$userid'";
-$res = $conn->query($sql);
-$row = $res->fetch_assoc();
-$fname = $row['fname'];
-$lname = $row['lname'];
-$name= $fname . " " . $lname;
-$img= $row['image'];
+    $res = $conn->query($sql);
+    $row = $res->fetch_assoc();
+    $fname = $row['fname'];
+    $lname = $row['lname'];
+    $name = $fname . " " . $lname;
+    $img = $row['image'];
+    ?>
 
-?>
-<div style="text-align: center;">
-    <h1><b>Professional Profile For : <?= $name ; ?></b></h1>
-    <img src="../<?= $img ; ?>" class="img-fluid rounded-circle" style="max-width: 200px; height: auto; margin-top: 20px;">
-</div>
+    <div class="container py-5">
+        <!-- Profile Header -->
+        <div class="cv-profile-header">
+            <img src="../<?= $img; ?>" class="cv-profile-image" alt="<?= $name; ?>">
+            <h1 class="cv-profile-name"><?= $name; ?></h1>
+            <p class="text-muted">Attorney Professional Profile</p>
+        </div>
 
+        <!-- Educational History Section -->
+        <div class="cv-section">
+            <h2 class="section-title">Educational Background</h2>
 
-<section class="form-section my-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-            <div class="text-center mb-4">
-            <h2 class="section-title">1.Reported Educational History</h2>
-            </div>
-                    <!-- Educational Background -->
-                    <div class="mb-4 p-4 bg-light rounded border shadow-sm">
-                        <h4 class="text-primary mb-3">🎓 Educational Background</h4>
-                        <p><strong>University:</strong> <?= $univ; ?></p>
-                        <p><strong>Graduation Year:</strong> <?= $year; ?></p>
+            <div class="content-card">
+                <h4><i class="fas fa-university"></i> University Education</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>University:</strong></p>
+                        <div class="content-detail"><?= $univ; ?></div>
                     </div>
-
-                    <!-- Additional Qualifications -->
-                    <div class="mb-4 p-4 bg-light rounded border shadow-sm">
-                        <h4 class="text-primary mb-3">📜 Additional Qualifications</h4>
-                        <p><strong>Certification Level:</strong></p>
-                        <div class="p-3 bg-white rounded border"><?= nl2br($level); ?></div>
+                    <div class="col-md-6">
+                        <p><strong>Graduation Year:</strong></p>
+                        <div class="content-detail"><?= $year; ?></div>
                     </div>
-
-                    <!-- Interest in Learning -->
-                    <div class="mb-4 p-4 bg-light rounded border shadow-sm">
-                        <h4 class="text-primary mb-3">🚀 Learning & Career Growth</h4>
-                        <p><strong>Interest in Further Learning:</strong></p>
-                        <div class="p-3 bg-white rounded border"><?= nl2br($desc); ?></div>
-                    </div>
-
                 </div>
+            </div>
+
+            <div class="content-card">
+                <h4><i class="fas fa-certificate"></i> Certifications & Qualifications</h4>
+                <p><strong>Certification Level:</strong></p>
+                <div class="content-detail"><?= nl2br($level); ?></div>
+            </div>
+
+            <div class="content-card">
+                <h4><i class="fas fa-book-reader"></i> Career Development & Learning</h4>
+                <p><strong>Professional Interests:</strong></p>
+                <div class="content-detail"><?= nl2br($desc); ?></div>
             </div>
         </div>
-    
-</section>
 
- <!-- Application 1 Content End -->
+        <!-- Case History Section -->
+        <div class="cv-section">
+            <h2 class="section-title">Case History</h2>
 
-    <?php
-$sql2 = "SELECT * FROM `casewon` WHERE cvid='$cvid'";
-$res2 = $conn->query($sql2);
-?>
-<section class="form-section my-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="text-center mb-4">
-                    <h2 class="section-title">2.Reported Case History</h2>
-                </div>
+            <?php
+            $sql2 = "SELECT * FROM `casewon` WHERE cvid='$cvid'";
+            $res2 = $conn->query($sql2);
+            $t1 = 0;
 
-                <?php
-                $t1 = 0;
+            if ($res2->num_rows > 0) {
                 while ($row2 = $res2->fetch_assoc()) {
                     $t1++;
                     $year = $row2['year'];
                     $nbofcases = $row2['nbofcases'];
                     $desc = $row2['description'];
-                ?>
-                <div class="mb-4 p-4 bg-light rounded border shadow-sm">
-                    <h4 class="text-primary mb-3">🎓 Case #<?= $t1 ?></h4>
-                    <p><strong>Number of Cases:</strong> <?= $nbofcases ?></p>
-                    <p><strong>Year:</strong> <?= $year ?></p>
-                    <p><strong>Description:</strong></p>
-                    <div class="p-3 bg-white rounded border"><?= nl2br(htmlspecialchars($desc)) ?></div>
-                </div>
-                <?php } ?>
-
-                <?php if ($t1 === 0): ?>
-                    <div class="alert alert-info text-center">No reported cases found for this CV.</div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</section>
-
- <!-- Application 2 Content End -->
-
-<?php
-$sql3 = "SELECT * FROM `language` WHERE cvid='$cvid'";
-$res3 = $conn->query($sql3);
-$t2 = 0;
-?>
-<section class="form-section my-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="text-center mb-4">
-                    <h2 class="section-title">3.Reported Languages</h2>
-                </div>
-
-                <?php
-                $t2 = 0;
-                while ($row3 = $res3->fetch_assoc()) {
-                    $t2++;
-                    $lang = $row3['language'];
-                    $level = $row3['level'];
-                    
-                ?>
-                <div class="mb-4 p-4 bg-light rounded border shadow-sm">
-                    <h4 class="text-primary mb-3"> Language #<?= $t2." ".$lang ?></h4>
-                    <p><strong>Level:</strong> <?= $level ?></p>
+            ?>
+                    <div class="content-card">
+                        <h4><i class="fas fa-gavel"></i> Case Experience #<?= $t1 ?></h4>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p><strong>Number of Cases:</strong></p>
+                                <div class="content-detail"><?= $nbofcases ?></div>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Year:</strong></p>
+                                <div class="content-detail"><?= $year ?></div>
+                            </div>
+                        </div>
+                        <p><strong>Case Description:</strong></p>
+                        <div class="content-detail"><?= nl2br(htmlspecialchars($desc)) ?></div>
                     </div>
-                <?php } ?>
-
-                <?php if ($t2 === 0): ?>
-                    <div class="alert alert-info text-center">No reported cases found for this CV.</div>
-                <?php endif; ?>
-
-           </div>
-        </div>
-    </div>
-</section>
-
-
-<!-- Application 3 Content End -->
-
-<?php
-$sql4 = "SELECT * FROM `techskills` WHERE cvid='$cvid'";
-$res4 = $conn->query($sql4);
-?>
-<section class="form-section my-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="text-center mb-4">
-                    <h2 class="section-title">4.Reported Technical Skills</h2>
-                </div>
-
                 <?php
+                }
+            } else {
+                ?>
+                <div class="empty-state">
+                    <i class="fas fa-folder-open"></i>
+                    <p>No case history has been reported by this attorney.</p>
+                </div>
+            <?php
+            }
+            ?>
+        </div>
+
+        <!-- Languages Section -->
+        <div class="cv-section">
+            <h2 class="section-title">Language Proficiency</h2>
+
+            <?php
+            $sql3 = "SELECT * FROM `language` WHERE cvid='$cvid'";
+            $res3 = $conn->query($sql3);
+            $t2 = 0;
+
+            if ($res3->num_rows > 0) {
+            ?>
+                <div class="row">
+                    <?php
+                    while ($row3 = $res3->fetch_assoc()) {
+                        $t2++;
+                        $lang = $row3['language'];
+                        $level = $row3['level'];
+                    ?>
+                        <div class="col-md-4 mb-4">
+                            <div class="content-card text-center h-100">
+                                <h4><i class="fas fa-language"></i> <?= $lang ?></h4>
+                                <span class="badge-custom"><?= $level ?></span>
+                            </div>
+                        </div>
+                    <?php
+                    }
+                    ?>
+                </div>
+            <?php
+            } else {
+            ?>
+                <div class="empty-state">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>No language proficiencies have been reported by this attorney.</p>
+                </div>
+            <?php
+            }
+            ?>
+        </div>
+
+        <!-- Technical Skills Section -->
+        <div class="cv-section">
+            <h2 class="section-title">Technical Skills</h2>
+
+            <?php
+            $sql4 = "SELECT * FROM `techskills` WHERE cvid='$cvid'";
+            $res4 = $conn->query($sql4);
+
+            if ($res4->num_rows > 0) {
                 while ($row4 = $res4->fetch_assoc()) {
-                    
                     $desc = $row4['description'];
                     $pew = $row4['p/e/w'];
-                    
-                ?>
-                <div class="mb-4 p-4 bg-light rounded border shadow-sm">
-                <h4 class="text-primary mb-3">Level of proficiency in PowerPoint, Excel, and Word: <span style="color: black;"><?= $pew ?></span></h4>
-                    <p><strong>Other software skills known:</strong> <?= $desc ?></p>
+            ?>
+                    <div class="content-card">
+                        <h4><i class="fas fa-laptop-code"></i> Software Proficiency</h4>
+                        <div class="mb-3">
+                            <p><strong>Microsoft Office Proficiency:</strong></p>
+                            <div class="content-detail"><?= $pew ?></div>
+                        </div>
+                        <p><strong>Additional Software Skills:</strong></p>
+                        <div class="content-detail"><?= $desc ?></div>
                     </div>
-                <?php } ?>
+                <?php
+                }
+            } else {
+                ?>
+                <div class="empty-state">
+                    <i class="fas fa-desktop"></i>
+                    <p>No technical skills have been reported by this attorney.</p>
+                </div>
+            <?php
+            }
+            ?>
+        </div>
 
-              
-
-           </div>
+        <!-- Back Button -->
+        <div class="cv-footer">
+            <a href="applicants.php" class="back-btn">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Applicants
+            </a>
         </div>
     </div>
-</section>
-
-<div style="text-align: center;">
-<a href="applicants.php" class="btn btn-primary btn-action">
-         Back
-                                        </a>
-</div>
-
-    <!-- Form Section End -->
-
 
    
+
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+    <script>
+        // Add active class to current page nav item
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentLocation = window.location.pathname;
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
 
-   
-
-
-
-
+            navLinks.forEach(link => {
+                if (currentLocation.includes(link.getAttribute('href'))) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
 </body>
+
+</html>

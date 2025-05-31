@@ -19,7 +19,7 @@ if (isset($_POST['email'])) {
     $mail = new PHPMailer(true);
     try {
         $mail->isSMTP();
-        $mail->SMTPDebug = 2; // or 3 for more details
+        $mail->SMTPDebug = 0; // or 3 for more details
         $mail->Debugoutput = 'html';
 
         $mail->Host = 'smtp.gmail.com';
@@ -58,6 +58,8 @@ You'll receive the invitation shortly.\n\nBest regards,\n$adname\nLegal Administ
 
 
         $mail->send();
+
+        header("Location: accepted.php");
        
     } catch (Exception $e) {
         error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");

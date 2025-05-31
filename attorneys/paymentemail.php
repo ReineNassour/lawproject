@@ -86,7 +86,7 @@ if (isset($_POST['email'])) {
         if ($mail->send()) {
             // If email sent successfully, log success
             error_log("Email sent successfully to $email");
-            header("Location: paycontract.php");
+            header("Location: cashierpayment.php?id=" . $id);
         } else {
             error_log("Failed to send email to $email");
         }

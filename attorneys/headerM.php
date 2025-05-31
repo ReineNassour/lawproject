@@ -54,7 +54,7 @@
                         <ul class="navbar-nav ml-auto mr-3">
                             
                             <li class="nav-item">
-                                <a class="nav-link px-3 active" href="indexManager.php" style="color: #007bff; font-weight: 600;">Cases</a>
+                                <a class="nav-link px-3 active" href="indexManager.php" style="color: #007bff; font-weight: 600;">All Cases</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link px-3" href="managerwoncases.php" style="color: #1a2236; font-weight: 500;"> Cases Won</a>
@@ -63,7 +63,7 @@
                                 <a class="nav-link px-3" href="applicants.php" style="color: #1a2236; font-weight: 500;"> Applicants</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link px-3" href="newattContract.php" style="color: #1a2236; font-weight: 500;">Contract</a>
+                                <a class="nav-link px-3" href="passedlawyers.php" style="color: #1a2236; font-weight: 500;">Attorneys</a>
                             </li>
                         </ul>
 

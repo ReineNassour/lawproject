@@ -1,273 +1,275 @@
-<?php 
+<?php
+session_start();
 include '../db.php';
+if (!isset($_SESSION['admin'])) {
+    header("Location: ../login.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Attorney Contract</title>
- <title>Kanun - Law Firm Website Template</title>
-        <meta content="width=device-width, initial-scale=1.0" name="viewport">
-        <meta content="Law Firm Website Template" name="keywords">
-        <meta content="Law Firm Website Template" name="description">
+  <title>TheFirm - Attorney Contract</title>
+  <meta content="Law Firm Contract Management" name="keywords">
+  <meta content="Attorney Contract Management System" name="description">
 
-        <!-- Favicon -->
-        <link href="img/favicon.ico" rel="icon">
+  <!-- Favicon -->
+  <link href="img/favicon.ico" rel="icon">
 
-        
-        <!-- CSS Libraries -->
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-        <link href="lib/animate/animate.min.css" rel="stylesheet">
-        <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
-
-  <link rel="stylesheet" href="style.css">
-  <!-- Add Bootstrap CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Add Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
-      padding: 40px 0;
-      margin: 0;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: #ffffff;
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      color: #2c3e50;
-      text-align: center;
-      margin-bottom: 30px;
-      font-weight: 600;
-      font-size: 2rem;
-      position: relative;
-      padding-bottom: 15px;
-    }
-
-    h1::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100px;
-      height: 4px;
-      background: linear-gradient(to right, #007bff, #00c6ff);
-      border-radius: 2px;
-    }
-
-    .form-group {
-      margin-bottom: 25px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: #34495e;
-      font-weight: 500;
-      font-size: 0.95rem;
-    }
-
-    .form-control {
-      border: 2px solid #e9ecef;
-      border-radius: 8px;
-      padding: 12px 15px;
-      height: auto;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .form-control:focus {
-      border-color: #007bff;
-      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
-    }
-
-    textarea.form-control {
-      min-height: 120px;
-      resize: vertical;
-    }
-
-    .btn-submit {
-      background: linear-gradient(45deg, #007bff, #00c6ff);
-      border: none;
-      color: white;
-      padding: 12px 30px;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 500;
-      width: 100%;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-submit:hover {
-      background: linear-gradient(45deg, #0056b3, #007bff);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
-    }
-
-    .readonly-form .form-control {
-      background-color: #f8f9fa;
-      color: #495057;
-      cursor: not-allowed;
-    }
-
-    .contract-status {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 30px;
-      padding: 15px;
-      border-radius: 8px;
-      background-color: #e9ecef;
-      border-left: 5px solid #007bff;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        padding: 20px;
-        margin: 20px;
-      }
-      
-      h1 {
-        font-size: 1.5rem;
-      }
-    }
-  </style>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="../css/admincss.css" rel="stylesheet">
+  <!-- CSS Libraries -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
-  
+
+<?php include 'header.php' ; ?>
+
+  <div id="main-body-form">
+
     <?php
-    $id=$_GET['id'];
+    $id = $_GET['id'];
 
-    $sql="SELECT * FROM `attcontract` where attid='$id'";
-    $res=$conn->query($sql);
-    $sql1="SELECT * FROM `user` where id='$id'";
-    $res1=$conn->query($sql1);
-    $row1=$res1->fetch_assoc();
-    $fname=$row1['fname'];
-    $lname=$row1['lname'];
-    if($res->num_rows == 0){
+    $sql = "SELECT * FROM `attcontract` where attid='$id'";
+    $res = $conn->query($sql);
+    $sql1 = "SELECT * FROM `user` where id='$id'";
+    $res1 = $conn->query($sql1);
+    $row1 = $res1->fetch_assoc();
+    $fname = $row1['fname'];
+    $lname = $row1['lname'];
+    if ($res->num_rows == 0) {
     ?>
-    <div class="container">
-        <h1>Create Attorney Contract</h1>
-        <div class="contract-status">
-            <i class="fas fa-user-tie mr-2"></i>
-            Initiating contract for <h5><?= htmlspecialchars($fname." ".$lname) ; ?></h5>
+      <div class="page-container">
+        <div class="page-header">
+          <a href="passedlawyers.php" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1><i class="fas fa-file-signature mr-3"></i>Create Attorney Contract</h1>
         </div>
-        <form id="contractForm" method="POST" action="submitcontract.php">
+
+        <div class="form-container">
+          <div class="contract-status">
+            <i class="fas fa-user-tie"></i>
+            <p class="mb-1">Initiating contract for</p>
+            <h5 class="mb-0"><?= htmlspecialchars($fname . " " . $lname); ?></h5>
+          </div>
+
+          <form id="contractForm" method="POST" action="submitcontract.php">
             <div class="form-group">
-                <label for="salary"><i class="fas fa-dollar-sign mr-2"></i>Salary:</label>
-                <input type="number" class="form-control" id="salary" name="salary" required>
+              <label for="salary" class="form-label">Salary</label>
+              <div class="input-icon">
+                <i class="fas fa-dollar-sign"></i>
+                <input type="number" class="form-control" id="salary" name="salary" placeholder="Enter annual salary" required>
+              </div>
+              <div id="salaryError" class="validation-error">Please enter a valid salary amount.</div>
             </div>
-            <input type="hidden" name="attid" value="<?= htmlspecialchars($id) ; ?>">
-            
-            <div class="form-group">
-                <label for="start_date"><i class="fas fa-calendar-alt mr-2"></i>Start Date:</label>
-                <input type="date" class="form-control" id="start_date" name="start_date" required>
+
+            <input type="hidden" name="attid" value="<?= htmlspecialchars($id); ?>">
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="start_date" class="form-label">Start Date</label>
+                  <div class="input-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                  </div>
+                  <div id="startDateError" class="validation-error">Please select a valid start date.</div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="expiry_date" class="form-label">Expiry Date</label>
+                  <div class="input-icon">
+                    <i class="fas fa-calendar-times"></i>
+                    <input type="date" class="form-control" id="expiry_date" name="expiry_date"
+                      min="<?php echo date('Y-m-d'); ?>" required>
+                  </div>
+                  <div id="expiryDateError" class="validation-error">Expiry date must be after start date.</div>
+                </div>
+              </div>
             </div>
 
             <div class="form-group">
-                <label for="expiry_date"><i class="fas fa-calendar-times mr-2"></i>Expiry Date:</label>
-                <input type="date" class="form-control" id="expiry_date" name="expiry_date" 
-                       min="<?php echo date('Y-m-d'); ?>" required>
+              <label for="nb_of_hour" class="form-label">Weekly Working Hours</label>
+              <div class="input-icon">
+                <i class="fas fa-clock"></i>
+                <input type="number" class="form-control" id="nb_of_hour" name="nb_of_hour" placeholder="Enter weekly hours" required>
+              </div>
+              <div id="hoursError" class="validation-error">Please enter valid working hours (1-60).</div>
             </div>
 
             <div class="form-group">
-                <label for="nb_of_hour"><i class="fas fa-clock mr-2"></i>Number of Hours:</label>
-                <input type="number" class="form-control" id="nb_of_hour" name="nb_of_hour" required>
+              <label for="details" class="form-label">Contract Details</label>
+              <textarea class="form-control" id="details" name="details" rows="4" placeholder="Enter any additional contract details or terms..." required></textarea>
+              <div id="detailsError" class="validation-error">Please provide contract details.</div>
             </div>
 
-            <div class="form-group">
-                <label for="details"><i class="fas fa-file-alt mr-2"></i>Contract Details:</label>
-                <textarea class="form-control" id="details" name="details" rows="4" required></textarea>
-            </div>
-
-            <button type="submit" class="btn-submit">
-                <i class="fas fa-file-signature mr-2"></i>Create Contract
+            <button type="submit" class="btn btn-primary-2 btn-block">
+              <i class="fas fa-file-signature mr-2"></i>Create Contract
             </button>
-        </form>
-    </div>
+          </form>
+        </div>
+      </div>
     <?php
     } else {
     ?>
-    <div class="container">
-        <h1>Existing Attorney Contract</h1>
-        <div class="contract-status">
-            <i class="fas fa-check-circle mr-2"></i>
-            Contract already exists for <h5><?= htmlspecialchars($fname." ".$lname) ; ?></h5>
+      <div class="page-container">
+        <div class="page-header">
+          <a href="passedlawyers.php" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1><i class="fas fa-file-contract mr-3"></i>Existing Attorney Contract</h1>
         </div>
-        <form id="contractForm" class="readonly-form">
+
+        <div class="form-container">
+          <div class="contract-status existing">
+            <i class="fas fa-check-circle"></i>
+            <p class="mb-1">Contract already exists for</p>
+            <h5 class="mb-0"><?= htmlspecialchars($fname . " " . $lname); ?></h5>
+          </div>
+
+          <form id="contractForm" class="readonly-form">
             <?php
-            while($row=$res->fetch_assoc()){
-                $salary=$row['salary'];
-                $startdate=$row['startdate'];
-                $expirydate=$row['expirydate'];
-                $nbofhour=$row['nbofHour'];
-                $details=$row['details'];
+            while ($row = $res->fetch_assoc()) {
+              $salary = $row['salary'];
+              $startdate = $row['startdate'];
+              $expirydate = $row['expirydate'];
+              $nbofhour = $row['nbofHour'];
+              $details = $row['details'];
             ?>
-            <div class="form-group">
-                <label><i class="fas fa-dollar-sign mr-2"></i>Salary:</label>
-                <input type="number" class="form-control" value="<?= htmlspecialchars($salary) ; ?>" readonly>
-            </div>
+              <div class="form-group">
+                <label class="form-label">Salary</label>
+                <div class="input-icon">
+                  <i class="fas fa-dollar-sign"></i>
+                  <input type="text" class="form-control" value="<?= htmlspecialchars(number_format($salary)); ?>$" readonly>
+                </div>
+              </div>
 
-            <div class="form-group">
-                <label><i class="fas fa-calendar-alt mr-2"></i>Start Date:</label>
-                <input type="text" class="form-control" value="<?= htmlspecialchars($startdate) ; ?>" readonly>
-            </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Start Date</label>
+                    <div class="input-icon">
+                      <i class="fas fa-calendar-alt"></i>
+                      <input type="text" class="form-control" value="<?= htmlspecialchars(date('F d, Y', strtotime($startdate))); ?>" readonly>
+                    </div>
+                  </div>
+                </div>
 
-            <div class="form-group">
-                <label><i class="fas fa-calendar-times mr-2"></i>Expiry Date:</label>
-                <input type="text" class="form-control" value="<?= htmlspecialchars($expirydate) ; ?>" readonly>
-            </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Expiry Date</label>
+                    <div class="input-icon">
+                      <i class="fas fa-calendar-times"></i>
+                      <input type="text" class="form-control" value="<?= htmlspecialchars(date('F d, Y', strtotime($expirydate))); ?>" readonly>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <div class="form-group">
-                <label><i class="fas fa-clock mr-2"></i>Number of Hours:</label>
-                <input type="number" class="form-control" value="<?= htmlspecialchars($nbofhour) ; ?>" readonly>
-            </div>
+              <div class="form-group">
+                <label class="form-label">Weekly Working Hours</label>
+                <div class="input-icon">
+                  <i class="fas fa-clock"></i>
+                  <input type="text" class="form-control" value="<?= htmlspecialchars($nbofhour); ?> hours per week" readonly>
+                </div>
+              </div>
 
-            <div class="form-group">
-                <label><i class="fas fa-file-alt mr-2"></i>Contract Details:</label>
-                <textarea class="form-control" rows="4" readonly><?= htmlspecialchars($details) ; ?></textarea>
-            </div>
+              <div class="form-group">
+                <label class="form-label">Contract Details</label>
+                <textarea class="form-control" rows="4" readonly><?= htmlspecialchars($details); ?></textarea>
+              </div>
             <?php
             }
             ?>
-            <div style="text-align: center;">
-            <a href="passedlawyers.php" class="btn btn-primary">Back</a>
+
+            <div class="action-buttons-2">
+              <a href="passedlawyers.php" class="btn btn-primary-2">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Lawyers
+              </a>
             </div>
-        </form>
-    </div>
+          </form>
+        </div>
+      </div>
     <?php
     }
     ?>
 
-    <!-- Add Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </div>
+  <!-- Add Bootstrap JS and dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script>
-    document.getElementById("contractForm").addEventListener("submit", function(e) {
-        const startDate = new Date(document.querySelector("[name='start_date']").value);
-        const expiryDate = new Date(document.querySelector("[name='expiry_date']").value);
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const contractForm = document.getElementById('contractForm');
 
-        if (expiryDate <= startDate) {
+      if (contractForm && contractForm.getAttribute('method') === 'POST') {
+        // Only apply validation to the active form
+        contractForm.addEventListener('submit', function(e) {
+          let isValid = true;
+
+          // Salary validation
+          const salary = document.getElementById('salary');
+          const salaryError = document.getElementById('salaryError');
+          if (salary.value <= 0) {
+            salaryError.style.display = 'block';
+            isValid = false;
+          } else {
+            salaryError.style.display = 'none';
+          }
+
+          // Date validation
+          const startDate = new Date(document.getElementById('start_date').value);
+          const expiryDate = new Date(document.getElementById('expiry_date').value);
+          const expiryDateError = document.getElementById('expiryDateError');
+
+          if (expiryDate <= startDate) {
+            expiryDateError.style.display = 'block';
+            isValid = false;
+          } else {
+            expiryDateError.style.display = 'none';
+          }
+
+          // Hours validation
+          const hours = document.getElementById('nb_of_hour');
+          const hoursError = document.getElementById('hoursError');
+          if (hours.value <= 0 || hours.value > 60) {
+            hoursError.style.display = 'block';
+            isValid = false;
+          } else {
+            hoursError.style.display = 'none';
+          }
+
+          // Details validation
+          const details = document.getElementById('details');
+          const detailsError = document.getElementById('detailsError');
+          if (details.value.trim() === '') {
+            detailsError.style.display = 'block';
+            isValid = false;
+          } else {
+            detailsError.style.display = 'none';
+          }
+
+          if (!isValid) {
             e.preventDefault();
-            alert("Expiry date must be after start date.");
-        }
+          }
+        });
+      }
     });
-    </script>
+  </script>
+
+<?php include 'footer.php' ; ?>
+
 </body>
+
 </html>

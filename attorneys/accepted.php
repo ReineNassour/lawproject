@@ -3,6 +3,11 @@ session_start();
 include 'header.php';
 include 'db.php';
 
+if (!isset($_SESSION['attorney']['id'])) {
+    header('location: ../login.php');
+    exit();
+}
+
 $id=$_SESSION['attorney']['id'];
                 ?>
 <!DOCTYPE html>
@@ -30,10 +35,17 @@ $id=$_SESSION['attorney']['id'];
 <!-- Include Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
+ <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Libraries -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
 
     <!-- Template Stylesheet -->
-    <link href="../css/style.css" rel="stylesheet">
-    <link href="../css/accases.css" rel="stylesheet">
+    <link href="../css/admincss.css" rel="stylesheet">
   
     <style>
         .modal-dialog {
@@ -118,6 +130,10 @@ $id=$_SESSION['attorney']['id'];
     visibility: visible;
     opacity: 1;
   }
+
+  .modal-sm {
+  max-width: 500px; /* or any width you prefer */
+}
 </style>
 
     
@@ -126,15 +142,15 @@ $id=$_SESSION['attorney']['id'];
 <body>
     <div class="wrapper">       
 
-        <!-- Main Content Start -->
-        <div class="container dashboard-container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="dashboard-title">Accepted Cases</h2>
-                <button id="copyEmailBtn" class="btn btn-black">
+      
+            <div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-center w-100"><i class="fas fa-briefcase text-primary mr-2"></i>Accepted Cases</h2>
+         <button id="copyEmailBtn" class="btn btn-primary">
                     <i class="fas fa-envelope mr-2"></i>
                     Send Email
                 </button>
-            </div>
+    </div>
 
             <!-- Status Cards -->
             <div class="row status-cards mb-4">
@@ -169,6 +185,7 @@ $id=$_SESSION['attorney']['id'];
                                     <i class="fas fa-check-circle"></i>
                                 </div>
                                 <h5 class="card-title">Accepted Cases</h5>
+
                                 <?php
                                 $sql11 = "SELECT * FROM `case` where status='Accepted'  AND casestatus='Pending' AND attid='$id'";
                                 $res11 = $conn->query($sql11);
@@ -213,8 +230,27 @@ $id=$_SESSION['attorney']['id'];
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Accepted Cases</h5>
+                       <input type="text" id="searchInput" placeholder="Search By Name ,Case Type..." style="width: 280px; max-width:500px; height:45px;">
                     </div>
                 </div>
+   
+<script>
+document.getElementById('searchInput').addEventListener('input', function () {
+    const query = this.value.toLowerCase();
+    const rows = document.querySelectorAll('table tbody tr');
+
+    rows.forEach(row => {
+        const clientName = row.cells[1]?.textContent.toLowerCase() || '';
+        const caseType = row.cells[2]?.textContent.toLowerCase() || '';
+        const description = row.cells[4]?.textContent.toLowerCase() || '';
+
+        const match = clientName.includes(query) || caseType.includes(query) || description.includes(query);
+        row.style.display = match ? '' : 'none';
+    });
+});
+</script>
+
+
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <?php
@@ -261,12 +297,38 @@ $id=$_SESSION['attorney']['id'];
                                         <td><?= $row1['fname'] . " " . $row1['lname'] ?></td>
                                         <td><?= $row3['name'] ?></td>
                                         <td><?= date('M d, Y', strtotime($row['startdate'])) ?></td>
-                                        <td class="case-description" title="<?= $row['description'] ?>"><?= $row['description'] ?></td>
                                         <td>
-                                            <span class="status-badge status-accepted">
-                                                <i class="fas fa-check mr-1"></i> Accepted
-                                            </span>
-                                        </td>
+    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#descriptionModal<?= $row['id'] ?>">
+        Description
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="descriptionModal<?= $row['id'] ?>" tabindex="-1" aria-labelledby="descriptionModalLabel<?= $row['id'] ?>" aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="descriptionModalLabel<?= $row['id'] ?>">Case Description</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <?= nl2br(htmlspecialchars($row['description'])) ?>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</td>
+
+<td >
+    <span class="status-badge status-accepted text-success font-weight-bold">
+        <i class="fas fa-check mr-1"></i> Accepted
+    </span>
+</td>
+
                                         <td>
                                             <a href="acceptProcess.php?acceptid=0&nbb=<?= $row['id'] ?>" class="btn btn-danger btn-action">
                                                 <i class="fas fa-times mr-1"></i> Reject
@@ -368,8 +430,9 @@ $id=$_SESSION['attorney']['id'];
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="contactModalLabel">More Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
             </div>
+
         
             <div class="modal-body">
                 <form method="post" action="">
@@ -381,7 +444,7 @@ $id=$_SESSION['attorney']['id'];
                                         <tr>
                                             
                                             <th>Meeting Status</th>
-                                            <th>Session Address</th>
+                                            <th>Session Address</th>  
                                             <th>Contract</th>
                                             <th>Case History</th>
                                             <th>Case Status</th>
@@ -389,10 +452,11 @@ $id=$_SESSION['attorney']['id'];
                                     </thead>
                                     <tbody>
                                         <tr>
-                                           
+
+
                                             <!-- Additional columns for meeting status, session address, contract, case result -->
                                             <?php
-$sql6 = "SELECT id,status,link,date,time FROM meetings WHERE caseid='$caseid'";
+$sql6 = "SELECT id,status,link,date,time FROM meetings WHERE caseid='$caseid' ORDER BY id DESC LIMIT 1";
 $res6 = $conn->query($sql6);
 
 if ($res6->num_rows > 0) { 
@@ -433,14 +497,14 @@ function joinMeeting(link, meetingId) {
 ?>
                                            <td>
                                            <?php
-$sql7 = "SELECT id,status,link FROM meetings WHERE caseid='$caseid'";
+$sql7 = "SELECT id,status,link FROM meetings WHERE caseid='$caseid' ";
 $res7 = $conn->query($sql7);
 
 if ($res7->num_rows > 0) { 
     $row7 = $res7->fetch_assoc();
     
         ?>
-        <a href="location.php?pid=<?= $caseid ; ?>" class="btn btn-black btn-action">
+        <a href="location.php?pid=<?= $caseid ; ?>" class="btn btn-primary btn-action">
                                                 Get The Location
                                             </a>
         <?php
@@ -454,15 +518,17 @@ if ($res7->num_rows > 0) {
     }
     ?> 
                                            </td>
+
+                                
                                             
                                             <td>
-                                                <a href="ccontract.php?id=<?= $caseid ; ?>" class="btn btn-black btn-action">
+                                                <a href="contract.php?id=<?= $caseid ; ?>" class="btn btn-primary btn-action">
                                                     <i class="fas fa-file-contract mr-1"></i> Contract
                                                 </a>
                                             </td>
 
                                             <td>
-                                            <a href="history.php?id=<?= $caseid ; ?>" class="btn btn-black btn-action">
+                                            <a href="history.php?id=<?= $caseid ; ?>" class="btn btn-primary btn-action">
                                                      History
                                                 </a>
                                                 </td>
@@ -527,6 +593,28 @@ if ($res7->num_rows > 0) {
                         </div>
                     </div>
                 </form>
+<h2 style="text-align:center ">Schedule a Zoom Meeting:</h2><br>
+                 <form method="POST" action="zoomdate.php">
+    <input type="hidden" name="caseid" value="<?= $caseid ; ?>">
+    <strong><label>Meeting Link:</label></strong>
+    <input type="url" name="link" placeholder="https://zoom.us/..." required>
+    <strong><label>Select Meeting Date:</label></strong>    
+    <input type="date" name="date" min="<?= date('Y-m-d'); ?>" required>
+   <strong> <label>Start Time:</label></strong>
+    <input type="time" name="stime" required>
+    <strong><label>End Time:</label></strong>
+    <input type="time" name="etime" required>
+    <button type="submit" class="btn btn-primary btn-action">Set Meeting</button>
+   <?php if (isset($_GET['error'])): ?>
+    <script>
+        alert("<?php echo $_GET['error']; ?>");
+        // remove ?error=... from the URL
+        window.location.href = "accepted.php";
+    </script>
+<?php endif; ?>
+
+</form>
+
             </div>
         </div> <!-- Close modal-content -->
     </div> <!-- Close modal-dialog -->
@@ -662,10 +750,8 @@ $('#copyEmailBtn').click(function() {
         console.error('Could not copy text: ', err);
     });
 });
-
-
-
 </script>
+
 </body>
 
 </html>

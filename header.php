@@ -1,5 +1,5 @@
-<?php  include 'db.php';
-
+<?php  
+include 'db.php';
 ?>
  <header class="header" >
      <div class="container">
@@ -29,6 +29,7 @@
                              <li class="nav-item">
                                  <a class="nav-link" href="contact.php">Contact</a>
                              </li>
+                             
 
                              <li class="nav-item">
                                 

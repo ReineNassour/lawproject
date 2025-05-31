@@ -32,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['textarea'], $_POST['at
             }
         }
         
-        $sql = "INSERT INTO `case` (`description`, `startdate`, `enddate`, `status`,`casestatus`, `userid`, `categoryid`, `attid`) 
-                VALUES ('$new_text', NOW(), 0, 'Pending','Pending', $id, '$category', '$attorney')";
+        $sql = "INSERT INTO `case` (`description`, `startdate`, `enddate`, `status`,`casestatus`, `caseContractimg` ,`userid`, `categoryid`, `attid`) 
+                VALUES ('$new_text', NOW(), 0, 'Pending','Pending', 0 , $id, '$category', '$attorney')";
     
         if ($conn->query($sql) === TRUE) {
             header("Location: donebooking.php");

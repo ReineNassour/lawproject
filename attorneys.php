@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 include 'checkStatus.php';
 include 'header.php';
@@ -452,7 +451,7 @@ include 'header.php';
     }
 } else {
     echo '<div class="alert alert-info text-center" role="alert">
-            <strong>" Please <a href="track.php">Track your Case</a> Page and choose a case to leave your feedback. "</strong>
+            <strong>" Please Go To <a href="track.php" style="text-decoration:underline;">Track your Case</a> Page and choose a case to leave your feedback. "</strong>
           </div>';
 }
 }

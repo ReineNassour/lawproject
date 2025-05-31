@@ -19,7 +19,7 @@ if (isset($_POST['email'])) {
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->SMTPDebug = 2; // or 3 for more details
+            $mail->SMTPDebug = 0; 
             $mail->Debugoutput = 'html';
 
             $mail->Host = 'smtp.gmail.com';
@@ -57,7 +57,7 @@ if (isset($_POST['email'])) {
 
             $mail->send();
             
-         
+         header("location: rejected.php");
             
         } catch (Exception $e) {
             error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");

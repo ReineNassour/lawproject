@@ -1,6 +1,10 @@
 <?php
 session_start();
 include 'checkStatus.php';
+if (!isset($_SESSION['user']['id'])) {
+    header('location: login.php');
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

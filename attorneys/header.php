@@ -54,14 +54,17 @@
                     <div class="collapse navbar-collapse" id="navbarMain">
                         <ul class="navbar-nav ml-auto mr-3">
                             <li class="nav-item">
-                                <a class="nav-link px-3" href="index.php" style="color: #1a2236; font-weight: 500;">Cases</a>
+                                <a class="nav-link px-3" href="index.php" style="color: #1a2236; font-weight: 500;">All Cases</a>
                             </li>
                             
                             <li class="nav-item">
                                 <a class="nav-link px-3" href="finishedcases.php" style="color: #1a2236; font-weight: 500;">Old Cases</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link px-3" href="#" style="color: #1a2236; font-weight: 500;">Calendar</a>
+                                <a class="nav-link px-3" href="calendar.php" style="color: #1a2236; font-weight: 500;">Zoom Calendar</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link px-3" href="calendarSession.php" style="color: #1a2236; font-weight: 500;">Sessions Calendar</a>
                             </li>
                         </ul>
 
